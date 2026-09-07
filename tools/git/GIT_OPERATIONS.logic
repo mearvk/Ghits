@@ -1,0 +1,161 @@
+# Ubuntu Determinant Git operation logic
+# UTF-8 plain text, line-oriented .logic contract
+
+LOGIC-VERSION: 1
+OPERATIONS: premount,add,commit,push,resume,merge,rebase,restage,autocheck,moral,temperature,alter-comment,propath
+
+[ORIGINAL]
+RULE: Preserve each operation's ordinary Git file and history semantics.
+RULE: Relevance metadata supplements Git; it never replaces object identity or graph integrity.
+
+[FILE-RELEVANCE]
+TIER-1: Directly required files or objects.
+TIER-2: Materially related files or objects.
+PRIORI-INTEGRATION: An input already integrated, staged, referenced, or declared for a future operation.
+UPLOAD: A file or object introduced by the operation or declared as a priori integration.
+RULE: Keep TIER-2 and PRIORI-INTEGRATION as distinct markers.
+RULE: Record path or object reference and the operation that accepted a priori input.
+RULE: Relevance markers never authorize unrelated changes.
+
+[PROVENANCE]
+DATE: Preserve Git author and committer dates.
+TIMESTAMP: Preserve the operation timestamp when metadata is emitted.
+AUTHOR: Preserve the Git author identity from the commit object.
+COMMITTER: Preserve the Git committer identity from the commit object.
+PARENT-COMMIT: Record the parent object when metadata is emitted.
+OBJECT: Record relevant object IDs when available.
+
+[PREMOUNT]
+METHOD: Read-only pre-operation inventory of files newly introduced by a pending add, a pending commit, or both.
+SOURCE: add = pending worktree candidates; commit = pending staged candidates; both = their deterministic union.
+ORDER: Deterministic Git pathname order; shared paths across sources are reported once with a combined source marker.
+COLUMN: Emit a per-file table row with timestamp, author, size, suffix, operating system, learning grade, CS prerequisites, graded authorships, and college references.
+SIZE: Object-byte estimate per file; the running total rejects integer overflow rather than wrapping.
+GRADE: Learning grade is an advisory pedagogical marker (ungraded..graduate); it is never inferred from identity, credentials, or appearance and grants no privilege.
+PROVENANCE: Preserve author, timestamp, parent object, and relevant path references when a row is emitted.
+RULE: premount (inventory mode) performs no staging, commit, or transport; its rows are advisory metadata for later add/commit/push planning.
+RULE: Missing optional metadata is recorded as absent, never invented.
+PUSH-MODE: `premount push` emits a deterministic document, computes its reference, then transfers the ordered set as an ordered 200 MiB add/commit sequence.
+DOCUMENT: The document body is deterministic (transaction, size, path per ordered file); volatile fields such as timestamps are excluded.
+REFERENCE: The output reference is a digest of the document body. SHA-256 is the floor; SHA-512 is the permitted "or better". Same candidate set yields the same reference.
+TRANSACTION: Ordered transactions are at most 200 MiB; a file is never split; an object over 200 MiB is an oversize planning error, not a silent fragmentation.
+PARTIAL: Each transaction is committed in order; the resulting chain is transferred with the RESUME checkpoint policy for partial commits and resume.
+RULE: The reference proves byte-level integrity only (see SHA256.md); it is never authenticity or authorization and never relaxes the 200 MiB push ceiling.
+
+[ADD]
+METHOD: Ordinary git add plus deterministic relevance recording.
+BLOCK: 100 MiB logical blocks; do not split an individual file.
+ORDER: Breadth-first policy with deterministic Git pathname tie-breaking.
+
+[COMMIT]
+METHOD: Ordinary git commit plus integer planning and relevance recording.
+UNIT: 50 MiB logical units.
+ORDER: Deterministic Git pathname order.
+
+[PUSH]
+METHOD: Ordinary git push plus native transport accounting.
+LIMIT: 200 MiB conservative object accounting per transport transaction.
+RULE: Metadata estimates never override actual transport accounting.
+
+[RESUME]
+METHOD: Checkpoint/resume layer over the ordered 50 MiB commit units for slow or lossy connections.
+UNIT: The commit-part 50 MiB logical unit is the resumable granularity.
+TRANSACTION: Each push transaction carries at most 4 units (200 MiB); the native push guard re-measures the real object graph every attempt.
+CHECKPOINT: Record only units acknowledged by the remote, never units merely attempted.
+PARTIAL: A lossy attempt may acknowledge fewer units than requested, including zero; the acknowledged count must never regress.
+RESUME: The next attempt restarts at the first unacknowledged unit, not from zero.
+RETRY: Retries are bounded by a max-attempt ceiling; zero means unlimited by policy but the transaction ceiling still applies.
+HALT: When retries are exhausted with work remaining, HALT rather than loop; do not silently continue.
+LOSSY: Treat interruption as a normal condition; never weaken the 200 MiB ceiling to make a transfer fit.
+PROVENANCE: Preserve author, committer, date, timestamp, parent object, and effort correlation id across attempts.
+INTEGRATION: builtin push routes transport_push through the native resume front-end (transport_push_resume in push-budget.h); ordinary single-shot push is the one-unit, one-attempt case.
+CONFIG: push.resumeAttempts sets the retry ceiling (default 5; 0 = unlimited by policy) with the object guard enforced every attempt.
+RULE: The checkpoint is advisory transport bookkeeping; a stale or altered checkpoint never authorizes an oversized transfer or bypasses ordinary Git negotiation.
+
+[MERGE]
+METHOD: Ordinary Git merge plus future-base and relevance metadata.
+PRIORITY: Advisory only.
+FUTURE-POSIT: Record the intended future base message.
+REBASE-SIGNAL: Two or more explicitly associated merge events may qualify a later explicit rebase.
+RULE: The signal never silently rewrites history.
+
+[REBASE]
+METHOD: Ordinary Git rebase plus schedule-relative relevance metadata.
+RULE: Git's resulting rewritten graph remains authoritative.
+
+[RESTAGE]
+METHOD: Relative index-frame operation with durable administrative history.
+BASE-CHAIN: Ordinary Git commit ancestry is the base history.
+ADMIN-CHAIN: Ordered restage observations form a separate administrative chain.
+CROSS-REFERENCE: Each administrative event references the base commit and index frame observed.
+INDEX: The selected base tree becomes the actual Git index state; working tree is preserved by default.
+CALL: Save the exact restage function/command call and surrounding execution data.
+DIRECTION: Negative = backward, zero = current frame, positive = forward.
+ROUND-TRIP: Opposing movements remain separately recorded even when net movement is zero.
+CHAINS-COMMAND: `restage chains` correlates administrative observations with base commits.
+RULE: Positive movement requires a deterministic linear base history; arbitrary DAG descendant selection is not permitted.
+RULE: Restage must not silently discard working-tree or unsafe index changes.
+
+[AUTOCHECK]
+METHOD: Pull remote changes, inspect local state, resolve by deterministic merge/rebase policy, add and commit local changes, then prepare push transactions.
+PULL-FIRST: Synchronize with the configured remote before committing local changes.
+CONFLICT-AGE: Prefer merge when the codebase is less than 92 days old; prefer rebase at or beyond 92 days.
+CONFLICT-SAFETY: Do not invent conflict resolutions; halt on unresolved or ambiguous conflicts.
+LOCAL-COMMIT: Commit local changes after successful synchronization using the established add/commit rules.
+PUSH-PREPARE: Partition resulting commits according to the native 200 MiB conservative transport budget.
+PUSH-AUTHORITY: Autocheck prepares push work but does not silently perform transport.
+PROVENANCE: Preserve author, committer, date, timestamp, parent and relevant object references.
+
+[MORAL]
+METHOD: Symbolic software-blessing operation with durable provenance metadata.
+SPELL: One explicit spell cast adds 1 mana.
+GREAT: Explicit Great mode adds 10 mana per spell cast.
+RULE: Great status is never inferred from identity, appearance, IQ, credentials, or other personal characteristics.
+BLESSING: Ceremonial only; it grants no repository, execution, security, or authorization privilege.
+PROVENANCE: Preserve software, author, committer, date, timestamp, parent and relevant object references.
+OVERFLOW: Mana arithmetic must reject integer overflow rather than wrap.
+
+[TEMPERATURE]
+METHOD: Read-only advisory AI scan that assesses repository projects (subtrees) for staleness and improvement/recandle potential.
+BAND: Idle-age thermal band per project: hot (<=14d), warm (<=60d), cool (<=180d), cold (>180d). Cold/cool projects are the ones likely left alone.
+STRIP-1: quality_intention (0..100) — how good and how deliberate the project looks (structure, docs, tests, coherent intent).
+STRIP-2: relative_importance (0..100) — how much the project matters relative to the rest of the repository.
+STRIP-3: achievable_value (0..100) — total value unlockable by full improvement, DEFINED as headroom over quality: (100 - quality) * importance / 100.
+RECANDLE: A project is a recandle candidate when it is cold or cool AND importance >= 40 AND achievable_value >= 40.
+TOTAL: Report the total achievable value over the total current quality across the scanned set, expressing improvement unlocked relative to existing quality.
+SCALE: All strips are integers on a fixed 0..100 scale; achievable-value and totals arithmetic reject integer overflow rather than wrap.
+FAIRNESS: Scores are never inferred from author identity, appearance, IQ, or credentials; only from observable project signals.
+RULE: temperature is advisory and read-only; it performs no staging, commit, or transport and never gates any Git operation.
+PROVENANCE: Preserve author, committer, date, timestamp, parent and relevant object references when a record is emitted.
+
+[ALTER-COMMENT]
+METHOD: Integer-addressed commit-message alteration: `git alter-comment X "message"` alters only the messages of the last X commits.
+COUNT: X is a positive integer; X == 1 addresses the tip alone, X > 1 addresses a deterministic linear range of the last X commits.
+SCOPE: Only the human-readable commit message changes; trees, file content, authorship, dates, and commit order are preserved.
+REWRITE: Because the message is part of the commit object, altering it produces new object IDs for each addressed commit and its descendants; this is ordinary Git message-edit rewriting, and Git's resulting rewritten graph remains authoritative.
+RANGE: X must not exceed the commits reachable on the selected linear history; addressing more commits than exist is a planning error, never a silent clamp.
+MESSAGE: A non-empty replacement message is required; an empty or absent message is rejected rather than blanked or invented.
+LINEAR: The addressed range must be a deterministic linear history; arbitrary DAG descendant selection across a merge is not permitted.
+PROVENANCE: Preserve author, committer, date, timestamp, parent object, and relevant object references; record prior operation when chained.
+OVERFLOW: Rewrite-count arithmetic rejects integer overflow rather than wrapping.
+RULE: alter-comment changes messages only; it never adds, removes, or reorders commits, and it never rewrites history it was not explicitly asked to address.
+
+[PROPATH]
+METHOD: Path-scoped, lazily-expanding partial clone: `git propath URL [PATH ...]` clones only a tuple of paths, then fetches the rest on demand.
+SCOPE: The PATH arguments form the initial scope tuple of repo-relative directories; everything outside the scope is left unmaterialized.
+STATE: A scoped path is declared (in scope, not materialized), materialized (present locally), or evicted (local copy removed, still in scope, re-fetchable).
+EXPAND: shallow (default) materializes one directory level and fetches subdirectories only when reached (iterative); recursive materializes the whole subtree on first use.
+FETCH: A declared or evicted path needs fetch; reaching for it transparently materializes it again.
+EVICT: A materialized path idle for its TTL becomes an eviction candidate; default TTL is 2 days (172800 seconds).
+EVICT-SAFETY: Only materialized paths are evicted; eviction removes only the clean, re-fetchable local copy and never deletes committed or un-pushed work.
+TTL-ZERO: A TTL of zero means never auto-evict, not evict immediately; eviction may also be disabled entirely.
+IDLE: Idle age is now-minus-last-used with clock skew treated as just-used; age never goes negative.
+CONFIG: Defaults come from a per-repository config file (recommended `.propath`): URL, TTL-DAYS/TTL-SECONDS, EVICT, EXPAND, and PATH scope entries.
+OVERFLOW: Eviction-candidate counting rejects integer overflow rather than wrapping.
+PROVENANCE: Preserve author, committer, date, timestamp, parent object, and relevant path references; record prior operation when chained.
+RULE: propath is advisory local scope/cache bookkeeping; it never rewrites history, never changes remote object identity, and a stale or altered config never authorizes deleting un-pushed work.
+
+[CHAIN]
+RULE: Every operation may record PRIOR-OPERATION and PARENT-COMMIT.
+RULE: Operation records remain individually attributable when chained.
+RULE: Original Git relevance remains observable beside TIER-2 and PRIORI-INTEGRATION markers.
